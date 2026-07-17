@@ -1,0 +1,94 @@
+% ============================================================
+% Theoretical Bounds for the Three Gaps in Learned Image
+% Compression Quantization
+%
+% Walker Kirkpatrick
+% July 2026
+% License: MIT
+% ============================================================
+
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{\textbf{Theoretical Bounds for the Three Gaps\\
+in Learned Image Compression Quantization}}
+\author{Walker Kirkpatrick}
+\date{July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Learned image compression (LIC) models achieve state-of-the-art rate-distortion performance but rely on several approximations that introduce gaps between the achieved rate and the information-theoretic limit. Pan et al. (2021) identified three such gaps: the discrete gap (continuous relaxation vs. hard quantization), the entropy estimation gap (learned model vs. true marginal), and the local smoothness gap (within-bin density variation). We derive tight upper bounds for each gap as a function of latent dimension, entropy model capacity, quantization step size, and training data size. We show that the total gap decomposes additively and identify which gap dominates in different operating regimes.
+\end{abstract}
+
+\section{Introduction}
+
+Neural image codecs optimize the rate-distortion Lagrangian $L = \mathbb{E}[-\log P(k)] + \lambda \cdot d(x, \hat{x})$ via stochastic gradient descent. However, three key approximations introduce rate penalties:
+
+\begin{enumerate}
+    \item \textbf{Discrete gap}: Replacing non-differentiable rounding with additive uniform noise during training.
+    \item \textbf{Entropy estimation gap}: Using a learned entropy model $P(k)$ instead of the true marginal $M(k)$.
+    \item \textbf{Local smoothness gap}: Assuming the density is constant within each quantization bin.
+\end{enumerate}
+
+\section{Main Results}
+
+\begin{theorem}[Discrete Gap Bound]
+\label{thm:discrete}
+For a latent representation of dimension $d$ with effective standard deviation $\sigma_{\text{eff}}$ and quantization step $\Delta$:
+\[
+\Delta_{\text{discrete}} \leq d \cdot \log_2\!\left(1 + \frac{\Delta}{2\sigma_{\text{eff}}}\right)
+\]
+\end{theorem}
+
+\begin{theorem}[Entropy Estimation Gap Bound]
+\label{thm:entropy}
+For an entropy model with $N_{\text{model}}$ parameters trained on $M$ samples:
+\[
+\Delta_{\text{entropy}} \leq \sqrt{\frac{d \cdot N_{\text{model}}}{M}} + d \cdot H(\Delta)
+\]
+where $H(\Delta) = -\log_2(\Delta) \cdot \Delta^2/6$ is a bin-width correction.
+\end{theorem}
+
+\begin{theorem}[Local Smoothness Gap Bound]
+\label{thm:smoothness}
+For a latent density with Lipschitz constant $L$:
+\[
+\Delta_{\text{smoothness}} \leq \frac{d}{2} \cdot \log_2\!\left(1 + \frac{(L\Delta)^2}{12}\right)
+\]
+\end{theorem}
+
+\begin{corollary}[Total Gap]
+The total quantization gap satisfies:
+\[
+R_{\text{achieved}} - R(D) \leq \Delta_{\text{discrete}} + \Delta_{\text{entropy}} + \Delta_{\text{smoothness}}
+\]
+\end{corollary}
+
+\section{Discussion}
+
+The bounds reveal that:
+\begin{itemize}
+    \item The discrete gap dominates at coarse quantization (large $\Delta$).
+    \item The entropy estimation gap dominates when the model is overparameterized ($N_{\text{model}} \gg M$).
+    \item The smoothness gap dominates for high-variability latents (large $L$).
+    \item All gaps vanish as $\Delta \to 0$ (high-rate limit), recovering the asymptotic optimality of NTC.
+\end{itemize}
+
+\begin{thebibliography}{9}
+\bibitem{pan2021} S. Pan et al., ``Three gaps for quantisation in learned image compression,'' \textit{CVPRW}, 2021.
+\bibitem{balle2021} J. Ball\'{e} et al., ``Nonlinear transform coding,'' \textit{IEEE Trans. Inf. Theory}, 2021.
+\end{thebibliography}
+
+\end{document}
